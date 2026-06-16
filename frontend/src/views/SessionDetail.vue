@@ -147,12 +147,12 @@ function formatTime(d) {
         <div
           v-for="evt in session.events"
           :key="evt.id"
-          class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 px-4 py-3 flex items-center justify-between"
+          class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 px-4 py-3 grid grid-cols-6 gap-4 items-start"
         >
-          <div>
+          <div class="col-span-1">
             <span class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{{ evt.event_type }}</span>
           </div>
-          <pre class="text-xs text-gray-600 dark:text-gray-300 ml-4 overflow-x-auto max-w-md">{{ JSON.stringify(evt.event_data, null, 2) }}</pre>
+          <pre class="col-span-5 text-xs text-gray-600 dark:text-gray-300 overflow-x-auto">{{ JSON.stringify(evt.event_data, null, 2) }}</pre>
         </div>
       </div>
     </template>
