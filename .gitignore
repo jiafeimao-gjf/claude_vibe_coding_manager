@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+backend/venv/
+backend/.pytest_cache/
+*.egg-info/
+
+# Node
+frontend/node_modules/
+frontend/dist/
+
+# Data (generated at runtime)
+data/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Env
+.env
+.env.local
