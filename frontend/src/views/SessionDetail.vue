@@ -1,10 +1,10 @@
 <script setup>
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useSettingsStore } from '../stores/settings'
 import { getSession } from '../api'
-import { Loader2, ArrowLeft, MessageSquare, Clock, Terminal } from 'lucide-vue-next'
+import { Loader2, ArrowLeft, MessageSquare, Clock, Terminal, Copy, X } from 'lucide-vue-next'
 
 const route = useRoute()
 const router = useRouter()
@@ -13,6 +13,8 @@ const settings = useSettingsStore()
 const session = ref(null)
 const loading = ref(true)
 const activeTab = ref('messages')
+const showContinueModal = ref(false)
+const commandCopied = ref(false)
 
 onMounted(async () => {
   try {
@@ -32,6 +34,23 @@ function formatDate(d) {
 function formatTime(d) {
   if (!d) return '-'
   return new Date(d).toLocaleTimeString(settings.locale === 'en' ? 'en-US' : 'zh-CN')
+}
+
+const continueCommand = computed(() => {
+  if (!session.value) return ''
+  const cwd = session.value.cwd || '~'
+  const sid = session.value.session_id
+  return `cd "${cwd}" && claude --resume ${sid}`
+})
+
+async function copyCommand() {
+  try {
+    await navigator.clipboard.writeText(continueCommand.value)
+    commandCopied.value = true
+    setTimeout(() => { commandCopied.value = false }, 2000)
+  } catch (e) {
+    console.error('Failed to copy:', e)
+  }
 }
 </script>
 
@@ -80,6 +99,17 @@ function formatTime(d) {
         <p class="text-xs text-gray-400 dark:text-gray-500 mt-2 truncate">
           {{ t('sessionDetail.cwd') }} {{ session.cwd }}
         </p>
+        <div class="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700 flex items-center gap-3 flex-wrap">
+          <button
+            @click="showContinueModal = true"
+            class="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 rounded-lg transition-colors"
+          >
+            <Terminal :size="14" />
+            {{ t('sessionDetail.continueDev') }}
+          </button>
+          <span class="text-xs text-gray-400 dark:text-gray-500">→</span>
+          <code class="text-xs text-gray-500 dark:text-gray-400 font-mono truncate">claude --resume {{ session.session_id.slice(0, 8) }}...</code>
+        </div>
       </div>
 
       <!-- Tabs -->
@@ -160,5 +190,49 @@ function formatTime(d) {
     <div v-else class="text-center py-16 text-gray-500 dark:text-gray-400">
       {{ t('sessionDetail.notFound') }}
     </div>
+
+    <Teleport to="body">
+      <div
+        v-if="showContinueModal"
+        @click.self="showContinueModal = false"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
+      >
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 w-full max-w-xl mx-4 overflow-hidden">
+          <div class="flex items-center justify-between px-5 py-3 border-b border-gray-100 dark:border-gray-700">
+            <h3 class="font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+              <Terminal :size="16" />
+              {{ t('sessionDetail.continueDev') }}
+            </h3>
+            <button
+              @click="showContinueModal = false"
+              class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+            >
+              <X :size="18" />
+            </button>
+          </div>
+          <div class="p-5 space-y-3">
+            <p class="text-sm text-gray-600 dark:text-gray-300">
+              {{ t('sessionDetail.commandHint') }}
+            </p>
+            <pre class="bg-gray-900 text-green-400 p-4 rounded-lg text-sm font-mono overflow-x-auto whitespace-pre-wrap break-all">{{ continueCommand }}</pre>
+          </div>
+          <div class="px-5 py-3 bg-gray-50 dark:bg-gray-700/30 flex items-center justify-end gap-2">
+            <button
+              @click="showContinueModal = false"
+              class="px-3 py-1.5 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+            >
+              {{ t('sessionDetail.close') }}
+            </button>
+            <button
+              @click="copyCommand"
+              class="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors"
+            >
+              <Copy :size="14" />
+              {{ commandCopied ? t('sessionDetail.copied') : t('sessionDetail.copyCommand') }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </Teleport>
   </div>
 </template>

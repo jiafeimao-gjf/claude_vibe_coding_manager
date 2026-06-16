@@ -61,16 +61,17 @@ backend/
 ```
 frontend/
 ├── src/
-│   ├── main.js              # App entry, plugin registration
+│   ├── main.js              # App entry, plugin registration (Pinia, Router, i18n)
 │   ├── App.vue              # Root component
 │   ├── router/index.js      # Vue Router config
-│   ├── stores/              # Pinia stores (project, session, message, import)
+│   ├── stores/              # Pinia stores: app (stats), settings (theme + locale)
+│   ├── composables/         # useDarkMode (toggles .dark class on <html>)
+│   ├── i18n/                # vue-i18n setup + locales/{zh-CN,en}.js
 │   ├── api/                 # Axios client + API modules
-│   ├── views/               # Page components (Dashboard, ProjectList, SessionBrowser, etc.)
-│   └── components/          # Reusable components (SessionCard, MessageList, StatsPanel, etc.)
+│   ├── views/               # Page components (Dashboard, ProjectList, SessionDetail, ...)
+│   └── components/          # Sidebar (with theme + locale toggle buttons)
 ├── index.html
 ├── vite.config.js
-├── tailwind.config.js
 └── package.json
 ```
 
@@ -90,6 +91,13 @@ frontend/
 - **Session-message relationship**: Messages from `history.jsonl` are linked to sessions via `sessionId`; session metadata enriched from `sessions/*.json` and `projects/**/*.jsonl`
 - **File snapshots** are indexed with metadata (file path, version, hash) but actual content remains referenced from the original `~/.claude/file-history/` directory
 - **API pagination**: All list endpoints support `?page=&page_size=` query params
+
+### Frontend Features
+
+- **Dark mode**: Tailwind v4 `dark:` variant (configured via `@custom-variant dark (&:where(.dark, .dark *));` in `src/style.css`). Toggle persists in localStorage (`claude-history-settings`).
+- **i18n**: vue-i18n v10 with `zh-CN` and `en` locales; toggle persists in localStorage. Date formatting switches between `zh-CN` and `en-US` based on current locale.
+- **Settings store**: `src/stores/settings.js` — Pinia store with `theme` and `locale` refs + `toggleTheme` / `toggleLocale` actions.
+- **Continue session**: Session detail page has a "继续开发" / "Continue" button that opens a modal showing the exact `cd "<cwd>" && claude --resume <session_id>` command with a copy-to-clipboard button. Pure frontend, no backend endpoint.
 
 ### Database Schema (SQLite)
 

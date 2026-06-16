@@ -65,6 +65,11 @@ export default {
     pastedContents: '粘贴内容:',
     cwd: '工作目录:',
     pid: '进程',
+    continueDev: '继续开发',
+    commandHint: '在终端执行以下命令继续此会话:',
+    copyCommand: '复制命令',
+    copied: '已复制',
+    close: '关闭',
   },
   search: {
     title: '搜索消息',

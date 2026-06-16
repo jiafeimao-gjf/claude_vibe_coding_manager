@@ -65,6 +65,11 @@ export default {
     pastedContents: 'Pasted Contents:',
     cwd: 'CWD:',
     pid: 'PID',
+    continueDev: 'Continue',
+    commandHint: 'Run this command in your terminal to resume:',
+    copyCommand: 'Copy Command',
+    copied: 'Copied',
+    close: 'Close',
   },
   search: {
     title: 'Search Messages',
